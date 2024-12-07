@@ -1,0 +1,34 @@
+# Ignore target folder (build output)
+target/
+
+# Ignore Maven wrapper jar (but keep the wrapper script)
+!.mvn/wrapper/maven-wrapper.jar
+
+# Ignore IDEs and editor config files
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### VS Code ###
+.vscode/
+
+# Ignore Maven wrapper files (except the wrapper itself)
+.mvn/
+
+# Ignore helper and build artifacts
+HELP.md
+
+# Ignore generated build output and temp files
+*.log
+*.tmp
