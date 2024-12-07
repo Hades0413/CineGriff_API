@@ -1,4 +1,5 @@
 # Ignore target folder (build output)
+target/
 
 # Ignore Maven wrapper jar (but keep the wrapper script)
 !.mvn/wrapper/maven-wrapper.jar
