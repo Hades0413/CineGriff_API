@@ -55,19 +55,19 @@ public class GeneroController {
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(ObjectError::getDefaultMessage)
                     .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(new ErrorResponse("400", String.join(", ", errors)));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errors)));
         }
 
         if (genero.getNombreGenero() == null || genero.getNombreGenero().isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse("400", "El nombre del género no puede estar vacío."));
+                    .body(new ErrorResponse(400, "El nombre del género no puede estar vacío."));
         }
 
         // Verificar si el género ya existe
         Genero existingGenero = generoService.findByNombreGenero(genero.getNombreGenero());
         if (existingGenero != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("409", "Ya existe un género con este nombre: " + genero.getNombreGenero()));
+                    .body(new ErrorResponse(409, "Ya existe un género con este nombre: " + genero.getNombreGenero()));
         }
 
         Genero nuevoGenero = generoService.saveGenero(genero);
@@ -79,7 +79,7 @@ public class GeneroController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleJsonParseException(HttpMessageNotReadableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("400", "El JSON enviado es incorrecto o está mal formado"));
+                .body(new ErrorResponse(400, "El JSON enviado es incorrecto o está mal formado"));
     }
 
     // Actualizar un género existente
@@ -91,18 +91,18 @@ public class GeneroController {
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(ObjectError::getDefaultMessage)
                     .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(new ErrorResponse("400", String.join(", ", errors)));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errors)));
         }
 
         if (genero.getNombreGenero().isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse("400", "El nombre del género no puede estar vacío"));
+                    .body(new ErrorResponse(400, "El nombre del género no puede estar vacío"));
         }
 
         Genero existingGenero = generoService.findByNombreGenero(genero.getNombreGenero());
         if (existingGenero != null && existingGenero.getCodigoGenero() != codigoGenero) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("409", "Ya existe un género con este nombre: " + genero.getNombreGenero()));
+                    .body(new ErrorResponse(409, "Ya existe un género con este nombre: " + genero.getNombreGenero()));
         }
 
         Optional<Genero> generoOptional = generoService.getGeneroByCodigoGenero(codigoGenero);
@@ -112,7 +112,7 @@ public class GeneroController {
             Genero updatedGenero = generoService.saveGenero(generoToUpdate);
             return ResponseEntity.ok(updatedGenero);
         } else {
-            return ResponseEntity.status(404).body(new ErrorResponse("404", "Género no encontrado"));
+            return ResponseEntity.status(404).body(new ErrorResponse(404, "Género no encontrado"));
         }
     }
 
@@ -127,12 +127,12 @@ public class GeneroController {
             generoService.deleteGenero(codigoGenero);
 
             SuccessResponse successResponse = new SuccessResponse(
-                    "200",
+                    200,
                     String.format("Género %s con código %d eliminado con éxito", nombreGenero, codigoGenero));
 
             return ResponseEntity.ok(successResponse);
         } else {
-            return ResponseEntity.status(404).body(new ErrorResponse("404", "Género no encontrado"));
+            return ResponseEntity.status(404).body(new ErrorResponse(404, "Género no encontrado"));
         }
     }
 
@@ -143,7 +143,7 @@ public class GeneroController {
         if (genero != null) {
             return ResponseEntity.ok(genero);
         } else {
-            return ResponseEntity.status(404).body(new ErrorResponse("404", "Género no encontrado"));
+            return ResponseEntity.status(404).body(new ErrorResponse(404, "Género no encontrado"));
         }
     }
 }

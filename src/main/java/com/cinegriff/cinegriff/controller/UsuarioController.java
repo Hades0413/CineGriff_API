@@ -66,7 +66,7 @@ public class UsuarioController {
             return ResponseEntity.ok(usuarioOpt.get());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse("404", "Usuario no encontrado"));
+                    .body(new ErrorResponse(400, "Usuario no encontrado"));
         }
     }
 
@@ -85,7 +85,7 @@ public class UsuarioController {
         usuarioService.guardarUsuario(usuario);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new SuccessResponse("201", "Usuario registrado exitosamente"));
+                .body(new SuccessResponse(201, "Usuario registrado exitosamente"));
     }
 
     // Actualizar un usuario
@@ -95,7 +95,7 @@ public class UsuarioController {
         Optional<Usuario> existingUserOpt = usuarioService.obtenerUsuarioPorCodigoUsuario(codigoUsuario);
 
         if (!existingUserOpt.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse("404", "Usuario no encontrado");
+            ErrorResponse errorResponse = new ErrorResponse(400, "Usuario no encontrado");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
@@ -126,13 +126,13 @@ public class UsuarioController {
             usuarioService.eliminarUsuario(codigoUsuario);
 
             SuccessResponse successResponse = new SuccessResponse(
-                    "200",
+                    200,
                     String.format("Usuario %s con código %d eliminado con éxito", nombreCompleto, codigoUsuario));
 
             return ResponseEntity.ok(successResponse);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse("404", "Usuario no encontrado"));
+                    .body(new ErrorResponse(400, "Usuario no encontrado"));
         }
     }
 
@@ -143,12 +143,12 @@ public class UsuarioController {
         if ((loginRequest.getCorreoUsuario() == null || loginRequest.getCorreoUsuario().isEmpty()) &&
                 (loginRequest.getUsernameUsuario() == null || loginRequest.getUsernameUsuario().isEmpty())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("400", "El correo electrónico o el nombre de usuario son obligatorios"));
+                    .body(new ErrorResponse(400, "El correo electrónico o el nombre de usuario son obligatorios"));
         }
 
         if (loginRequest.getContrasenaUsuario() == null || loginRequest.getContrasenaUsuario().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("400", "La contraseña es obligatoria"));
+                    .body(new ErrorResponse(400, "La contraseña es obligatoria"));
         }
 
         Usuario usuario = null;
@@ -163,18 +163,18 @@ public class UsuarioController {
 
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("401", "Credenciales incorrectas"));
+                    .body(new ErrorResponse(401, "Credenciales incorrectas"));
         }
 
         // Aquí puedes retornar una respuesta de éxito con código y mensaje
-        return ResponseEntity.ok(new SuccessResponse("200", "Login exitoso"));
+        return ResponseEntity.ok(new SuccessResponse(200, "Login exitoso"));
     }
 
     // Manejo de excepciones (por ejemplo, JSON mal formado)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("500", "Error interno del servidor: " + ex.getMessage()));
+                .body(new ErrorResponse(500, "Error interno del servidor: " + ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -184,7 +184,7 @@ public class UsuarioController {
                 .reduce("", (msg1, msg2) -> msg1 + ", " + msg2);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("400", "Errores de validación: " + errorMessage));
+                .body(new ErrorResponse(400, "Errores de validación: " + errorMessage));
     }
 
     // Manejo de errores para JSON mal formado (ejemplo de manejo de excepciones
@@ -192,7 +192,7 @@ public class UsuarioController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleJsonParseException(HttpMessageNotReadableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("400", "El JSON enviado es incorrecto o está mal formado"));
+                .body(new ErrorResponse(400, "El JSON enviado es incorrecto o está mal formado"));
     }
 
     private List<String> validarCampos(Usuario usuario) {
@@ -249,6 +249,8 @@ public class UsuarioController {
     }
 
     private ResponseEntity<Object> generarError(HttpStatus status, String mensaje) {
-        return ResponseEntity.status(status).body(new ErrorResponse(String.valueOf(status.value()), mensaje));
+        return ResponseEntity.status(status)
+                .body(new ErrorResponse(status.value(), mensaje));
     }
+
 }

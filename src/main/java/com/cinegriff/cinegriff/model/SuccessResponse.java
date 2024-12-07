@@ -12,6 +12,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SuccessResponse {
-    private String status;
+    private int status;
     private String message;
 }

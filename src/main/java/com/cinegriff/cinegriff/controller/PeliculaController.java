@@ -58,7 +58,7 @@ public class PeliculaController {
         List<String> errores = validarCampos(pelicula);
 
         if (!errores.isEmpty()) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("400", String.join(", ", errores)));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errores)));
         }
 
         try {
@@ -68,7 +68,7 @@ public class PeliculaController {
         } catch (Exception e) {
             // Capturamos errores generales
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("500", "Error interno del servidor: " + e.getMessage()));
+                    .body(new ErrorResponse(500, "Error interno del servidor: " + e.getMessage()));
         }
     }
 
@@ -81,7 +81,7 @@ public class PeliculaController {
 
         // Si hay errores de validación personalizada, devolverlos en la respuesta
         if (!errores.isEmpty()) {
-            return ResponseEntity.badRequest().body(new ErrorResponse("400", String.join(", ", errores)));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errores)));
         }
 
         // Validar errores de la anotación @Valid
@@ -89,7 +89,7 @@ public class PeliculaController {
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(ObjectError::getDefaultMessage)
                     .collect(Collectors.toList());
-            return ResponseEntity.badRequest().body(new ErrorResponse("400", String.join(", ", errors)));
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errors)));
         }
 
         // Buscar la película existente por ID
@@ -107,7 +107,7 @@ public class PeliculaController {
             } catch (DataIntegrityViolationException e) {
                 // Manejar la excepción de título duplicado
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(new ErrorResponse("409",
+                        .body(new ErrorResponse(409,
                                 "El título de la película ya existe: " + pelicula.getTituloPelicula()));
             }
         } else {
@@ -127,14 +127,14 @@ public class PeliculaController {
 
             // Respuesta de éxito personalizada
             SuccessResponse successResponse = new SuccessResponse(
-                    "200",
+                    200,
                     String.format("Película '%s' con ID %d eliminada con éxito", tituloPelicula, id));
 
             return ResponseEntity.ok(successResponse);
         } else {
             // Respuesta de error personalizada si no se encuentra la película
             return ResponseEntity.status(404)
-                    .body(new ErrorResponse("404", String.format("Película con ID %d no encontrada", id)));
+                    .body(new ErrorResponse(400, String.format("Película con ID %d no encontrada", id)));
         }
     }
 
@@ -149,7 +149,7 @@ public class PeliculaController {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         String mensajeError = "Error de integridad de datos: " + ex.getMostSpecificCause().getMessage();
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("409", mensajeError));
+                .body(new ErrorResponse(409, mensajeError));
     }
 
     // Manejo de errores para JSON mal formado (ejemplo de manejo de excepciones
@@ -157,7 +157,7 @@ public class PeliculaController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleJsonParseException(HttpMessageNotReadableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("400", "El JSON enviado es incorrecto o está mal formado"));
+                .body(new ErrorResponse(400, "El JSON enviado es incorrecto o está mal formado"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -167,7 +167,7 @@ public class PeliculaController {
                 .reduce("", (msg1, msg2) -> msg1 + ", " + msg2);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("400", "Errores de validación: " + errorMessage));
+                .body(new ErrorResponse(400, "Errores de validación: " + errorMessage));
     }
 
     private List<String> validarCampos(Pelicula pelicula) {
