@@ -78,8 +78,8 @@ public class UsuarioController {
             return generarError(HttpStatus.BAD_REQUEST, String.join(", ", errores));
         }
 
-        if (usuario.getAdmin() != 1) {
-            usuario.setAdmin(0);
+        if (usuario.getIsadminUsuario() != 1) {
+            usuario.setIsadminUsuario(0);
         }
 
         usuarioService.guardarUsuario(usuario);
@@ -106,8 +106,8 @@ public class UsuarioController {
 
         usuario.setCodigoUsuario(codigoUsuario);
 
-        if (usuario.getAdmin() != 1) {
-            usuario.setAdmin(0);
+        if (usuario.getIsadminUsuario() != 1) {
+            usuario.setIsadminUsuario(0);
         }
 
         Usuario usuarioActualizado = usuarioService.actualizarUsuario(usuario);

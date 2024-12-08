@@ -51,7 +51,6 @@ public class PeliculaController {
     }
 
     // Crear una película
-
     @PostMapping("/register")
     public ResponseEntity<Object> createPelicula(@RequestBody Pelicula pelicula, BindingResult bindingResult) {
         // Validar campos de la película
@@ -61,10 +60,23 @@ public class PeliculaController {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errores)));
         }
 
+        // Verificar si ya existe una película con el mismo título
         try {
+            Optional<Pelicula> existingPelicula = Optional
+                    .ofNullable(peliculaService.findByTitulo(pelicula.getTituloPelicula()));
+            if (existingPelicula.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(new ErrorResponse(409,
+                                "El título de la película ya existe: " + pelicula.getTituloPelicula()));
+            }
+
             // Intentamos guardar la nueva película
             Pelicula savedPelicula = peliculaService.savePelicula(pelicula);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedPelicula);
+        } catch (DataIntegrityViolationException e) {
+            // Manejar cualquier error de integridad
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse(409, "Error al guardar la película: " + e.getMessage()));
         } catch (Exception e) {
             // Capturamos errores generales
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -199,7 +211,7 @@ public class PeliculaController {
         }
 
         // Validar la fecha de estreno
-        if (pelicula.getFechaEstrenoPelicula() == null || pelicula.getFechaEstrenoPelicula().isEmpty()) {
+        if (pelicula.getFechaEstrenoPelicula() == null) {
             errores.add("La fecha de estreno de la película es obligatoria");
         }
 

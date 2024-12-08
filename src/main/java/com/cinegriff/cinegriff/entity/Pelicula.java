@@ -9,6 +9,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.sql.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -51,8 +54,9 @@ public class Pelicula implements Serializable {
     private Genero genero;
 
     @NotNull(message = "La fecha de estreno no puede estar vacía")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Column(name = "fechaestreno_Pelicula", nullable = false)
-    private String fechaEstrenoPelicula;
+    private Date fechaEstrenoPelicula;
 
     @Min(value = 1, message = "La clasificación de edad debe ser al menos 1")
     @Column(name = "clasificacionedad_Pelicula", nullable = false)

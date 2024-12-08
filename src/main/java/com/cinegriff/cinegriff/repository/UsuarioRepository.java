@@ -14,7 +14,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     Usuario findByCorreoUsuario(String correoUsuario);
 
-    List<Usuario> findByAdmin(int admin);
+    List<Usuario> findByIsadminUsuario(int isadminUsuario);
 
     // Método para buscar usuarios por usernameUsuario
     List<Usuario> findByUsernameUsuarioContaining(String usernameUsuario);

@@ -31,7 +31,7 @@ public class UsuarioService {
 
     public List<Usuario> listarAdministradores() {
         return usuarioRepository.findAll().stream()
-                .filter(usuario -> usuario.getAdmin() == 1)
+                .filter(usuario -> usuario.getIsadminUsuario() == 1)
                 .toList();
     }
 

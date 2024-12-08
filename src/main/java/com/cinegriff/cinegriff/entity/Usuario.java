@@ -56,6 +56,6 @@ public class Usuario implements Serializable {
     @Column(name = "contrasena_Usuario", nullable = false)
     private String contrasenaUsuario;
 
-    @Column(name = "admin", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private int admin;
+    @Column(name = "isadmin_Usuario", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private int isadminUsuario;
 }
