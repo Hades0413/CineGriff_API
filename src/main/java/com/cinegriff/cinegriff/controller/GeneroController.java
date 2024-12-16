@@ -42,9 +42,19 @@ public class GeneroController {
 
     // Obtener un género por codigoGenero
     @GetMapping("/{codigoGenero}")
-    public ResponseEntity<Genero> getGeneroByCodigoGenero(@PathVariable int codigoGenero) {
+    public ResponseEntity<Object> getGeneroByCodigoGenero(@PathVariable int codigoGenero) {
         Optional<Genero> genero = generoService.getGeneroByCodigoGenero(codigoGenero);
-        return genero.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+        if (genero.isPresent()) {
+            // Si se encuentra el género, devolverlo con una respuesta 200 (OK)
+            return ResponseEntity.ok(genero.get());
+        } else {
+            // Si no se encuentra el género, devolver una respuesta 404 con un mensaje de
+            // error
+            ErrorResponse errorResponse = new ErrorResponse(404,
+                    "No se encontró el género con el ID: " + codigoGenero);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
 
     // Registrar un nuevo género (crear)
@@ -70,8 +80,13 @@ public class GeneroController {
                     .body(new ErrorResponse(409, "Ya existe un género con este nombre: " + genero.getNombreGenero()));
         }
 
-        Genero nuevoGenero = generoService.saveGenero(genero);
-        return ResponseEntity.status(201).body(nuevoGenero);
+        // Guardar el nuevo género
+        generoService.saveGenero(genero);
+
+        // Respuesta de éxito sin usar 'data', solo mensaje y status
+        SuccessResponse successResponse = new SuccessResponse(201, "Género registrado correctamente");
+
+        return ResponseEntity.status(201).body(successResponse);
     }
 
     // Manejo de errores para JSON mal formado (ejemplo de manejo de excepciones
@@ -87,6 +102,7 @@ public class GeneroController {
     public ResponseEntity<Object> updateGenero(@PathVariable int codigoGenero, @Valid @RequestBody Genero genero,
             BindingResult bindingResult) {
 
+        // Validar si hay errores en la solicitud
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getAllErrors().stream()
                     .map(ObjectError::getDefaultMessage)
@@ -94,24 +110,36 @@ public class GeneroController {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, String.join(", ", errors)));
         }
 
+        // Validar que el nombre del género no esté vacío
         if (genero.getNombreGenero().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse(400, "El nombre del género no puede estar vacío"));
         }
 
+        // Verificar si ya existe un género con el mismo nombre
         Genero existingGenero = generoService.findByNombreGenero(genero.getNombreGenero());
         if (existingGenero != null && existingGenero.getCodigoGenero() != codigoGenero) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(409, "Ya existe un género con este nombre: " + genero.getNombreGenero()));
         }
 
+        // Buscar el género a actualizar por código
         Optional<Genero> generoOptional = generoService.getGeneroByCodigoGenero(codigoGenero);
         if (generoOptional.isPresent()) {
+            // Si el género existe, actualizamos sus datos
             Genero generoToUpdate = generoOptional.get();
             generoToUpdate.setNombreGenero(genero.getNombreGenero());
-            Genero updatedGenero = generoService.saveGenero(generoToUpdate);
-            return ResponseEntity.ok(updatedGenero);
+
+            // Guardamos el género actualizado
+            generoService.saveGenero(generoToUpdate);
+
+            // Respuesta de éxito sin necesidad de usar updatedGenero, solo con mensaje
+            SuccessResponse successResponse = new SuccessResponse(200, "Género actualizado correctamente");
+
+            // Retornamos respuesta de éxito
+            return ResponseEntity.ok(successResponse);
         } else {
+            // Si no se encuentra el género
             return ResponseEntity.status(404).body(new ErrorResponse(404, "Género no encontrado"));
         }
     }

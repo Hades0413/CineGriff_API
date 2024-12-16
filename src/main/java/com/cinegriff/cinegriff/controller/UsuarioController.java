@@ -92,27 +92,37 @@ public class UsuarioController {
     @PutMapping("/{codigoUsuario}")
     public ResponseEntity<Object> actualizarUsuario(@PathVariable int codigoUsuario,
             @Valid @RequestBody Usuario usuario) {
+
+        // Verificar si el usuario existe
         Optional<Usuario> existingUserOpt = usuarioService.obtenerUsuarioPorCodigoUsuario(codigoUsuario);
 
+        // Si no se encuentra el usuario
         if (!existingUserOpt.isPresent()) {
             ErrorResponse errorResponse = new ErrorResponse(400, "Usuario no encontrado");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
+        // Validar campos del usuario
         List<String> errores = validarCampos(usuario);
         if (!errores.isEmpty()) {
             return generarError(HttpStatus.BAD_REQUEST, String.join(", ", errores));
         }
 
+        // Establecer el código de usuario y actualizar el campo admin si es necesario
         usuario.setCodigoUsuario(codigoUsuario);
 
         if (usuario.getIsadminUsuario() != 1) {
             usuario.setIsadminUsuario(0);
         }
 
-        Usuario usuarioActualizado = usuarioService.actualizarUsuario(usuario);
+        // Actualizar el usuario en la base de datos sin necesidad de guardar el usuario
+        // actualizado en una variable
+        usuarioService.actualizarUsuario(usuario);
 
-        return ResponseEntity.ok(usuarioActualizado);
+        // Responder con mensaje de éxito
+        SuccessResponse successResponse = new SuccessResponse(200, "Usuario actualizado correctamente");
+
+        return ResponseEntity.status(HttpStatus.OK).body(successResponse);
     }
 
     // Eliminar un usuario

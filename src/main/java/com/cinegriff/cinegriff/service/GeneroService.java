@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cinegriff.cinegriff.entity.Genero;
@@ -17,7 +18,8 @@ public class GeneroService {
 
     // Obtener todos los géneros
     public List<Genero> getAllGeneros() {
-        return generoRepository.findAll();
+        // Ordenamos por codigo_Genero de forma ascendente
+        return generoRepository.findAll(Sort.by(Sort.Order.asc("codigoGenero")));
     }
 
     // Obtener un género por su codigoGenero

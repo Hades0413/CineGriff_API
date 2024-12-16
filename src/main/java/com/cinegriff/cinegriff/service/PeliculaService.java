@@ -1,12 +1,14 @@
 package com.cinegriff.cinegriff.service;
 
-import com.cinegriff.cinegriff.entity.Pelicula;
-import com.cinegriff.cinegriff.repository.PeliculaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import com.cinegriff.cinegriff.entity.Pelicula;
+import com.cinegriff.cinegriff.repository.PeliculaRepository;
 
 @Service
 public class PeliculaService {
@@ -16,7 +18,8 @@ public class PeliculaService {
 
     // Obtener todas las películas
     public List<Pelicula> getAllPeliculas() {
-        return peliculaRepository.findAll();
+        // Ordenamos las películas por codigo_Pelicula de forma ascendente
+        return peliculaRepository.findAll(Sort.by(Sort.Order.asc("codigoPelicula")));
     }
 
     // Obtener una película por su id

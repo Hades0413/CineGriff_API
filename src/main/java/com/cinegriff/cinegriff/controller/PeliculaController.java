@@ -45,9 +45,17 @@ public class PeliculaController {
 
     // Obtener una película por id
     @GetMapping("/{id}")
-    public ResponseEntity<Pelicula> getPeliculaById(@PathVariable int id) {
+    public ResponseEntity<Object> getPeliculaById(@PathVariable int id) {
         Optional<Pelicula> pelicula = peliculaService.getPeliculaById(id);
-        return pelicula.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+        if (pelicula.isPresent()) {
+            return ResponseEntity.ok(pelicula.get());
+        } else {
+            // Si no se encuentra la película, devolver una respuesta 404 con un mensaje de
+            // error
+            ErrorResponse errorResponse = new ErrorResponse(404, "No se encontró la película con el ID: " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
 
     // Crear una película
@@ -70,9 +78,12 @@ public class PeliculaController {
                                 "El título de la película ya existe: " + pelicula.getTituloPelicula()));
             }
 
-            // Intentamos guardar la nueva película
-            Pelicula savedPelicula = peliculaService.savePelicula(pelicula);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedPelicula);
+            // Guardar la nueva película y obtener la película guardada
+            peliculaService.savePelicula(pelicula);
+
+            // Enviar respuesta con código 201 (Created) y mensaje de éxito
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new SuccessResponse(201, "Película registrada con éxito"));
         } catch (DataIntegrityViolationException e) {
             // Manejar cualquier error de integridad
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -114,8 +125,14 @@ public class PeliculaController {
             peliculaToUpdate.setFechaEstrenoPelicula(pelicula.getFechaEstrenoPelicula());
 
             try {
-                Pelicula updatedPelicula = peliculaService.savePelicula(peliculaToUpdate);
-                return ResponseEntity.ok(updatedPelicula);
+                // Guardar la película actualizada y responder con éxito
+                peliculaService.savePelicula(peliculaToUpdate);
+
+                // Responder con mensaje de éxito al actualizar la película
+                SuccessResponse successResponse = new SuccessResponse(200, "Película actualizada con éxito");
+
+                // Enviar la respuesta con el código 200 (OK) y el mensaje de éxito
+                return ResponseEntity.status(HttpStatus.OK).body(successResponse);
             } catch (DataIntegrityViolationException e) {
                 // Manejar la excepción de título duplicado
                 return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -123,7 +140,9 @@ public class PeliculaController {
                                 "El título de la película ya existe: " + pelicula.getTituloPelicula()));
             }
         } else {
-            return ResponseEntity.notFound().build();
+            // Respuesta personalizada si no se encuentra la película
+            ErrorResponse errorResponse = new ErrorResponse(404, "No se encontró la película con ID " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse); // Código 404 y mensaje de error
         }
     }
 
@@ -152,9 +171,17 @@ public class PeliculaController {
 
     // Buscar por título de película
     @GetMapping("/titulo/{titulo}")
-    public ResponseEntity<Pelicula> getPeliculaByTitulo(@PathVariable String titulo) {
+    public ResponseEntity<Object> getPeliculaByTitulo(@PathVariable String titulo) {
         Pelicula pelicula = peliculaService.findByTitulo(titulo);
-        return pelicula != null ? ResponseEntity.ok(pelicula) : ResponseEntity.notFound().build();
+
+        if (pelicula != null) {
+            // Película encontrada, retornamos la película
+            return ResponseEntity.ok(pelicula);
+        } else {
+            // Si la película no se encuentra, enviamos un mensaje de error personalizado
+            ErrorResponse errorResponse = new ErrorResponse(404, "No se encontró la película con el título: " + titulo);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
